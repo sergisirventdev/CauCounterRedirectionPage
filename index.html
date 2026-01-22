@@ -3,145 +3,49 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Descargar la app</title>
+  <title>Redirección</title>
   <meta name="robots" content="noindex" />
-
-  <style>
-    :root { color-scheme: light dark; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      min-height: 100vh;
-    }
-
-    /* Fondo oscurecido */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-      background: rgba(0,0,0,.6);
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* Modal */
-    .modal {
-      width: min(520px, 100%);
-      border-radius: 16px;
-      padding: 18px 16px;
-      background: #111;
-      color: #fff;
-      box-shadow: 0 10px 30px rgba(0,0,0,.35);
-    }
-
-    .title {
-      margin: 0 0 8px;
-      font-size: 18px;
-      line-height: 1.2;
-    }
-
-    .msg {
-      margin: 0 0 14px;
-      font-size: 15px;
-      line-height: 1.35;
-      opacity: .92;
-    }
-
-    .btn {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      border: 1px solid #fff;
-      background: #fff;
-      color: #111;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .small {
-      margin: 12px 0 0;
-      font-size: 13px;
-      opacity: .8;
-    }
-
-    .small a { color: #fff; }
-
-    /* Para que en móviles se sienta “app-like” */
-    .spacer {
-      min-height: 100vh;
-      background: #0b0b0b;
-    }
-  </style>
 </head>
-
 <body>
-  <div class="spacer"></div>
-
-  <!-- Pop up -->
-  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="t" aria-describedby="m">
-    <div class="modal">
-      <h1 class="title" id="t">Descarga</h1>
-      <p class="msg" id="m">Detectando tu dispositivo…</p>
-      <button class="btn" id="continueBtn" type="button">Continuar</button>
-
-      <!-- Si de verdad quieres “solo pop up”, puedes borrar esta línea.
-           Yo la dejaría: te salva si la detección falla o si se abre en un dispositivo raro. -->
-      <p class="small" id="altLinks" style="display:none;">
-        ¿No es la tienda correcta?
-        <a id="iosLink" href="#" rel="noopener">App Store</a> ·
-        <a id="androidLink" href="#" rel="noopener">Google Play</a>
-      </p>
-    </div>
-  </div>
+  <noscript>Necesitas activar JavaScript para continuar.</noscript>
 
   <script>
-    // 1) Pega aquí tus enlaces reales:
+    // Cambia estas URLs si algún día lo necesitas
     const IOS_URL = "https://apps.apple.com/app/balatro/id6474869308";
     const ANDROID_URL = "https://play.google.com/store/apps/details?id=com.playstack.balatro.android";
 
     const ua = navigator.userAgent || "";
     const isAndroid = /Android/i.test(ua);
 
-    // iPadOS moderno puede reportar "MacIntel", por eso este extra:
+    // iPadOS moderno puede reportar MacIntel, por eso el extra:
     const isIOS = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-
-    const msgEl = document.getElementById("m");
-    const btn = document.getElementById("continueBtn");
-    const alt = document.getElementById("altLinks");
-    const iosLink = document.getElementById("iosLink");
-    const androidLink = document.getElementById("androidLink");
-
-    iosLink.href = IOS_URL;
-    androidLink.href = ANDROID_URL;
 
     let targetUrl = null;
     let storeName = null;
 
     if (isIOS) {
       targetUrl = IOS_URL;
-      storeName = "App Store";
+      storeName = "la App Store";
     } else if (isAndroid) {
       targetUrl = ANDROID_URL;
       storeName = "Google Play";
     } else {
-      // Si alguien entra desde un sitio no móvil, no redirigimos: mostramos enlaces
-      msgEl.textContent = "No se ha podido detectar tu dispositivo. Elige tu tienda para continuar.";
-      btn.textContent = "Abrir App Store";
-      btn.onclick = () => window.location.href = IOS_URL;
-      alt.style.display = "block";
-      return;
+      // Si no es móvil, no intentamos adivinar
+      document.body.innerHTML =
+        '<p>Elige tu tienda:</p>' +
+        `<p><a href="${IOS_URL}">Abrir App Store</a></p>` +
+        `<p><a href="${ANDROID_URL}">Abrir Google Play</a></p>`;
+      throw new Error("Plataforma no móvil");
     }
 
-    msgEl.textContent = `Se va a abrir ${storeName} para descargar la aplicación.`;
-    btn.onclick = () => {
-      window.location.href = targetUrl;
-    };
-
-    // Si quieres enlaces alternativos visibles siempre, cambia a "block"
-    // alt.style.display = "block";
+    // Popup nativo del navegador
+    const ok = window.confirm(`Se le va a redirigir a ${storeName}. ¿Continuar?`);
+    if (ok) {
+      window.location.assign(targetUrl);
+    } else {
+      // Si cancela, mostramos un texto simple (opcional)
+      document.body.innerHTML = "<p>Cancelado.</p>";
+    }
   </script>
 </body>
 </html>
